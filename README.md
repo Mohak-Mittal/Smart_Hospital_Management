@@ -17,9 +17,6 @@
   <img alt="Platform" src="https://img.shields.io/badge/runs%20on-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey?style=flat-square">
 </p>
 
-<img src="docs/assets/repo_qr.png" alt="QR code linking to this repository" width="150">
-<br>
-<sub>📱 Scan to open this repository</sub>
 
 [Quick start](#-quick-start) · [Features](#-features) · [Architecture](#-architecture) · [Demo logins](#-demo-logins) · [Tests](#-testing) · [Docs](#-documentation)
 
