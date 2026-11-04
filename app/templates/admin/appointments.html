@@ -1,0 +1,12 @@
+{% extends "base.html" %}{% block title %}Appointments{% endblock %}
+{% block content %}
+<div class="page-head"><h1>Appointments</h1></div>
+<form class="card card-body mb-3" method="get"><div class="row g-2 align-items-end">
+<div class="col-md-4"><label class="form-label" for="q">Search</label><input class="form-control" id="q" name="q" value="{{ q }}" placeholder="Patient name, ID or ref"></div>
+<div class="col-md-3"><label class="form-label" for="status">Status</label><select class="form-select" id="status" name="status"><option value="">All</option>{% for s in ['pending','scheduled','completed','cancelled','emergency'] %}<option value="{{ s }}" {{ 'selected' if status == s }}>{{ s|title }}</option>{% endfor %}</select></div>
+<div class="col-md-3"><label class="form-label" for="date">Date</label><input class="form-control" type="date" id="date" name="date" value="{{ day }}"></div><div class="col-md-2"><button class="btn btn-primary" type="submit">Filter</button></div></div></form>
+<div class="card"><div class="table-responsive"><table class="table mb-0 align-middle"><thead><tr><th>Ref</th><th>When</th><th>Patient</th><th>Doctor</th><th>Fee</th><th>Status</th><th>Payment</th><th></th></tr></thead><tbody>
+{% for a in page.items %}<tr><td>{{ a.code }}</td><td>{{ a.start_time|dt }}</td><td>{{ a.patient.full_name }}</td><td>Dr. {{ a.doctor.full_name }}</td><td>{{ a.fee|inr }}</td><td>{{ m.status(a.status) }}</td><td>{{ m.status(a.payment_status) }}</td>
+<td class="text-end text-nowrap">{% if a.status == 'pending' %}{{ m.post_btn(url_for('admin.appointment_cash', appt_id=a.id), 'Receive cash', 'btn btn-sm btn-outline-success', 'Record a demo cash payment of ' ~ (a.fee|inr) ~ ' and confirm this appointment?') }}{% endif %}
+{% if a.status in ('pending','scheduled') %}{{ m.post_btn(url_for('admin.cancel_appointment', appt_id=a.id), 'Cancel', 'btn btn-sm btn-outline-danger', 'Cancel this appointment? Any paid fee is refunded in full (demo).') }}{% endif %}</td></tr>
+{% else %}<tr><td colspan="8">{{ m.empty('No appointments match.') }}</td></tr>{% endfor %}</tbody></table></div></div>{{ m.pager(page) }}{% endblock %}

@@ -1,0 +1,8 @@
+{% extends "base.html" %}{% block title %}My reports{% endblock %}
+{% block content %}
+<div class="page-head"><h1>My reports</h1></div>
+<div class="card"><div class="table-responsive"><table class="table mb-0 align-middle"><thead><tr><th>Ref</th><th>Title</th><th>Patient</th><th>Status</th><th></th></tr></thead><tbody>
+{% for r in page.items %}<tr><td>{{ r.report_code }}</td><td>{{ r.title }}</td><td>{{ r.patient.full_name }}</td><td>{{ m.status(r.status) }}</td><td class="text-end text-nowrap">
+<a class="btn btn-sm btn-outline-secondary" href="{{ url_for('reports.report_pdf', report_id=r.id) }}">PDF</a>
+{% if not r.is_published %}{{ m.post_btn(url_for('doctor.publish_report', report_id=r.id), 'Publish', 'btn btn-sm btn-primary', 'Publish this report to the patient portal?') }}{% endif %}</td></tr>
+{% else %}<tr><td colspan="5">{{ m.empty('You have not written any reports yet. Open a patient record to start one.') }}</td></tr>{% endfor %}</tbody></table></div></div>{{ m.pager(page) }}{% endblock %}

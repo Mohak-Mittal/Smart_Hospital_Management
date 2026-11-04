@@ -1,0 +1,51 @@
+{% extends "base.html" %}{% block title %}{{ patient.full_name }}{% endblock %}
+{% block content %}
+<div class="page-head"><div><h1>{{ patient.full_name }}</h1><div class="text-muted">{{ patient.patient_code }} · {{ patient.gender or '-' }} · Blood group {{ patient.blood_group or '-' }}</div></div><a class="btn btn-outline-secondary btn-sm" href="{{ url_for('doctor.dashboard') }}">← Dashboard</a></div>
+<p class="demo-banner">All clinical content in this system is demo data and not medical advice.</p>
+<div class="card mb-3"><div class="card-header">Patient history (self-reported)</div><div class="card-body pre-wrap">{{ patient.medical_history or 'Nothing recorded.' }}</div></div>
+
+<div class="card mb-3"><div class="card-header">Appointments with you</div><div class="card-body">
+{% for a in appts %}<div class="border rounded p-3 mb-3"><div class="d-flex justify-content-between flex-wrap"><div><strong>{{ a.start_time|dt }}</strong> · {{ a.code }} {{ m.status(a.status) }} <span class="ms-1">Fee {{ a.fee|inr }} {{ m.status(a.payment_status) }}</span></div></div>
+{% if a.reason %}<div class="small text-muted">Reason: {{ a.reason }}</div>{% endif %}
+{% if a.consultation_recorded_at %}<div class="mt-2"><div><strong>Diagnosis:</strong> {{ a.diagnosis }}</div><div class="pre-wrap"><strong>Notes:</strong> {{ a.consultation_notes }}</div></div>{% endif %}
+{% if a.status in ('scheduled','emergency') %}
+  <div class="mt-2">
+  {% if consult_appt_id == a.id or not a.consultation_recorded_at %}
+  <form method="post" action="{{ url_for('doctor.consultation', appt_id=a.id) }}" novalidate>{% set cf = consult_form if consult_appt_id == a.id else None %}
+    {% if cf %}{{ m.csrf() }}{{ m.field(cf.diagnosis) }}{{ m.field(cf.notes, rows=3) }}{% else %}{{ m.csrf() }}
+    <div class="mb-2"><label class="form-label" for="d{{ a.id }}">Diagnosis (demo)</label><input class="form-control" id="d{{ a.id }}" name="c-diagnosis" required maxlength="255"></div>
+    <div class="mb-2"><label class="form-label" for="n{{ a.id }}">Consultation notes</label><textarea class="form-control" id="n{{ a.id }}" name="c-notes" rows="3" required></textarea></div>{% endif %}
+    <button class="btn btn-sm btn-primary" type="submit">{{ 'Update' if a.consultation_recorded_at else 'Save' }} consultation</button></form>{% endif %}
+  {% if a.consultation_recorded_at %}{{ m.post_btn(url_for('doctor.complete', appt_id=a.id), 'Mark appointment completed', 'btn btn-sm btn-success mt-2', 'Mark this appointment as completed?') }}{% else %}<div class="small text-muted mt-1">Record the consultation before completing the appointment.</div>{% endif %}
+  </div>{% endif %}</div>
+{% else %}{{ m.empty('No appointments with you.') }}{% endfor %}</div></div>
+
+<div class="card mb-3"><div class="card-header">Treatment plans</div><div class="card-body">
+{% for p in plans %}<div class="border rounded p-3 mb-3"><div class="d-flex justify-content-between flex-wrap"><div><strong>{{ p.type_label }}</strong> — {{ p.diagnosis }} {{ m.status(p.status) }}<div class="small text-muted">{{ p.code }} · Estimated cost {{ p.cost|inr }}{% if p.doctor_approved_at %} · Discharge approved{% endif %}</div></div>
+<div class="text-nowrap">{% if p.status == 'planned' %}{{ m.post_btn(url_for('doctor.treatment_status', plan_id=p.id), 'Start', 'btn btn-sm btn-outline-primary', None, {'status': 'in_progress'}) }}{% endif %}
+{% if p.status == 'in_progress' %}{{ m.post_btn(url_for('doctor.treatment_status', plan_id=p.id), 'Mark completed', 'btn btn-sm btn-success', None, {'status': 'completed'}) }}{% endif %}
+{% if p.status == 'completed' and not p.doctor_approved_at %}{{ m.post_btn(url_for('doctor.approve_discharge', plan_id=p.id), 'Approve discharge', 'btn btn-sm btn-outline-success', 'Approve discharge for this patient?') }}{% endif %}
+{% if p.status in ('planned','in_progress') %}{{ m.post_btn(url_for('doctor.treatment_status', plan_id=p.id), 'Cancel', 'btn btn-sm btn-outline-danger', 'Cancel this treatment plan?', {'status': 'cancelled'}) }}{% endif %}</div></div>
+{% if p.plan_details %}<p class="pre-wrap mt-2 mb-2">{{ p.plan_details }}</p>{% endif %}
+<ul class="timeline mt-2">{% for n in p.progress %}<li class="k-{{ n.kind }}"><div class="small text-muted">{{ n.created_at|dt }} · {{ n.kind|pretty }} · {{ n.author.name if n.author else '' }}</div><div class="pre-wrap">{{ n.note }}</div></li>{% endfor %}</ul>
+{% if p.status not in ('cancelled',) %}<form method="post" action="{{ url_for('doctor.treatment_progress', plan_id=p.id) }}" class="row g-2">{{ m.csrf() }}
+<div class="col-md-3"><select class="form-select form-select-sm" name="p-kind" aria-label="Entry type"><option value="progress">Progress note</option><option value="medication">Medication / treatment</option></select></div>
+<div class="col-md-7"><input class="form-control form-control-sm" name="p-note" maxlength="2000" placeholder="Add a progress note or medication entry" aria-label="Note" required></div>
+<div class="col-md-2 d-grid"><button class="btn btn-sm btn-outline-primary" type="submit">Add</button></div></form>{% endif %}</div>
+{% else %}{{ m.empty('No treatment plans yet.') }}{% endfor %}
+<h2 class="h6 mt-3">New treatment plan</h2>
+<form method="post" action="{{ url_for('doctor.create_treatment', patient_id=patient.id) }}" novalidate>{{ m.csrf() }}
+ {{ m.field(treatment_form.treatment_type, **{'data-treatment-type': '1'}) }}{{ m.field(treatment_form.diagnosis) }}{{ m.field(treatment_form.plan_details, rows=3) }}
+ <div class="row"><div class="col-md-6" data-for-type="medicine">{{ m.field(treatment_form.medicine_charges) }}</div><div class="col-md-6" data-for-type="medicine">{{ m.field(treatment_form.consultation_charges) }}</div>
+ <div class="col-md-4" data-for-type="surgery">{{ m.field(treatment_form.operation_charges) }}</div><div class="col-md-4" data-for-type="surgery">{{ m.field(treatment_form.surgeon_charges) }}</div><div class="col-md-4" data-for-type="surgery">{{ m.field(treatment_form.hospital_charges) }}</div>
+ <div class="col-md-6" data-for-type="physiotherapy">{{ m.field(treatment_form.session_charges) }}</div><div class="col-md-6" data-for-type="physiotherapy">{{ m.field(treatment_form.sessions) }}</div>
+ <div class="col-md-6" data-for-type="emergency">{{ m.field(treatment_form.emergency_charges) }}</div><div class="col-md-6" data-for-type="emergency">{{ m.field(treatment_form.treatment_charges) }}</div></div>
+ <div class="small text-muted mb-2">Consultation fee is billed from the appointment, so leave "Consultation charges" at 0 unless it is a separate charge.</div>
+ <button class="btn btn-primary" type="submit">Create treatment plan</button></form></div></div>
+
+<div class="card"><div class="card-header">Medical reports</div><div class="card-body">
+{% for r in reports %}<div class="d-flex justify-content-between border-bottom py-2"><div>{{ r.title }} <span class="small text-muted">{{ r.report_code }}</span> {{ m.status(r.status) }}</div><div class="text-nowrap"><a class="btn btn-sm btn-outline-secondary" href="{{ url_for('reports.report_pdf', report_id=r.id) }}">PDF</a>
+{% if not r.is_published %}{{ m.post_btn(url_for('doctor.publish_report', report_id=r.id), 'Publish', 'btn btn-sm btn-primary', 'Publish to the patient portal? The patient will be able to read it.') }}{% endif %}</div></div>{% endfor %}
+<h2 class="h6 mt-3">New report</h2>
+<form method="post" action="{{ url_for('doctor.create_report', patient_id=patient.id) }}" novalidate>{{ m.csrf() }}{{ m.field(report_form.title) }}{{ m.field(report_form.content) }}<button class="btn btn-primary" type="submit">Save draft</button></form></div></div>
+{% endblock %}

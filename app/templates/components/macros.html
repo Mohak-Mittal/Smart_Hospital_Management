@@ -1,0 +1,35 @@
+{% macro csrf() %}<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">{% endmacro %}
+{% macro status(s) %}<span class="badge text-bg-{{ badge(s) }}">{{ s|pretty }}</span>{% endmacro %}
+{% macro field(f) %}
+<div class="mb-3">
+{% if f.type == 'BooleanField' %}
+  <div class="form-check">{{ f(class='form-check-input' ~ (' is-invalid' if f.errors else ''), **kwargs) }}
+  <label class="form-check-label" for="{{ f.id }}">{{ f.label.text }}</label></div>
+{% else %}
+  <label class="form-label" for="{{ f.id }}">{{ f.label.text }}{% if f.flags.required %} <span class="text-danger" aria-hidden="true">*</span>{% endif %}</label>
+  {{ f(class=('form-select' if f.type in ('SelectField','SelectMultipleField') else 'form-control') ~ (' is-invalid' if f.errors else ''), **kwargs) }}
+{% endif %}
+{% for e in f.errors %}<div class="invalid-feedback d-block">{{ e }}</div>{% endfor %}
+</div>
+{% endmacro %}
+{% macro post_btn(url, label, cls='btn btn-sm btn-outline-secondary', confirm=None, fields=None) %}
+<form method="post" action="{{ url }}" class="d-inline"{% if confirm %} data-confirm="{{ confirm }}"{% endif %}>{{ csrf() }}{% if fields %}{% for k, v in fields.items() %}<input type="hidden" name="{{ k }}" value="{{ v }}">{% endfor %}{% endif %}<button class="{{ cls }}" type="submit">{{ label }}</button></form>
+{% endmacro %}
+{% macro empty(msg, link=None, label=None) %}
+<div class="empty"><div class="fs-3" aria-hidden="true">∅</div><p class="mb-2">{{ msg }}</p>{% if link %}<a class="btn btn-sm btn-primary" href="{{ link }}">{{ label }}</a>{% endif %}</div>
+{% endmacro %}
+{% macro kpi(label, value, sub='', cls='') %}
+<div class="card kpi {{ cls }} h-100"><div class="label">{{ label }}</div><div class="value">{{ value }}</div>{% if sub %}<div class="sub">{{ sub }}</div>{% endif %}</div>
+{% endmacro %}
+{% macro pager(p) %}
+{% if p.pages > 1 %}
+<nav aria-label="Pagination" class="mt-3"><ul class="pagination pagination-sm justify-content-center mb-0">
+  <li class="page-item {{ 'disabled' if not p.has_prev }}"><a class="page-link" href="{{ page_url(p.prev_num) if p.has_prev else '#' }}">Previous</a></li>
+  {% for n in p.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
+    {% if n %}<li class="page-item {{ 'active' if n == p.page }}"><a class="page-link" href="{{ page_url(n) }}">{{ n }}</a></li>
+    {% else %}<li class="page-item disabled"><span class="page-link">…</span></li>{% endif %}
+  {% endfor %}
+  <li class="page-item {{ 'disabled' if not p.has_next }}"><a class="page-link" href="{{ page_url(p.next_num) if p.has_next else '#' }}">Next</a></li>
+</ul></nav>
+{% endif %}
+{% endmacro %}

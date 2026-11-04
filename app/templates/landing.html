@@ -1,0 +1,17 @@
+{% extends "base.html" %}{% block title %}Welcome{% endblock %}
+{% block public %}
+<section class="hero"><div class="container">
+  <h1>Care that is easy to book,<br>easy to follow.</h1>
+  <p class="lead mt-3" style="max-width:620px">Find a doctor, book a slot, pay the consultation fee (simulated), and follow your treatment, reports and invoices in one place.</p>
+  <a class="btn btn-primary btn-lg me-2 mt-2" href="{{ url_for('auth.register') }}">Register as a patient</a>
+  <a class="btn btn-outline-light btn-lg mt-2" href="{{ url_for('auth.login') }}">Sign in</a>
+  <p class="mt-4 small" style="color:#bcd">Demo project for learning — all data and payments are fictional.</p>
+</div></section>
+<section class="container my-5"><h2 class="h4 mb-3">Consultation fees</h2>
+  <div class="row g-3">{% for s in specs %}<div class="col-6 col-lg-3"><div class="feature"><h3 class="h6">{{ s.name }}</h3><div class="fs-4 fw-bold" style="color:var(--teal-dark)">{{ s.base_fee|inr(0) }}</div><div class="text-muted small">{{ s.description }}</div></div></div>{% endfor %}</div>
+  <div class="row g-3 mt-2">
+    <div class="col-md-4"><div class="feature"><h3 class="h6">Patients</h3><p class="mb-0 small">Book appointments, pay, view treatment progress, download reports and invoices.</p></div></div>
+    <div class="col-md-4"><div class="feature"><h3 class="h6">Doctors &amp; nurses</h3><p class="mb-0 small">Record consultations, plan treatment, publish reports, add nursing notes.</p></div></div>
+    <div class="col-md-4"><div class="feature"><h3 class="h6">Reception / admin</h3><p class="mb-0 small">Rooms, medicines, emergency queue, billing, insurance and discharge in one dashboard.</p></div></div>
+  </div></section>
+{% endblock %}

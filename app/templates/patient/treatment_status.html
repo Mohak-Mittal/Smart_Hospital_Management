@@ -1,0 +1,13 @@
+{% extends "base.html" %}{% block title %}Treatment status{% endblock %}
+{% block content %}
+<div class="page-head"><h1>Treatment &amp; admission status</h1></div>
+{% for s in stays if not s.released_at %}<div class="alert alert-info">Currently admitted: <strong>{{ s.room }}</strong> since {{ s.assigned_at|dt }}.</div>{% endfor %}
+{% for p in plans %}<div class="card mb-3"><div class="card-header d-flex justify-content-between">{{ p.type_label }} — {{ p.diagnosis }} {{ m.status(p.status) }}</div><div class="card-body">
+  <p class="small text-muted">Dr. {{ p.doctor.full_name }} · {{ p.code }}{% if p.doctor_approved_at %} · Discharge approved {{ p.doctor_approved_at|dfmt }}{% endif %}{% if p.discharged_at %} · Discharged {{ p.discharged_at|dfmt }}{% endif %}</p>
+  {% if p.plan_details %}<p class="pre-wrap">{{ p.plan_details }}</p>{% endif %}
+  {% if p.progress %}<ul class="timeline">{% for n in p.progress %}<li class="k-{{ n.kind }}"><div class="small text-muted">{{ n.created_at|dt }} · {{ n.kind|pretty }}</div><div class="pre-wrap">{{ n.note }}</div></li>{% endfor %}</ul>{% else %}<span class="text-muted">No timeline entries yet.</span>{% endif %}
+</div></div>
+{% else %}<div class="card"><div class="card-body">{{ m.empty('No treatment has been recorded for you yet.') }}</div></div>{% endfor %}
+{% if stays %}<div class="card"><div class="card-header">Room history</div><div class="table-responsive"><table class="table mb-0"><thead><tr><th>Room</th><th>From</th><th>To</th></tr></thead><tbody>
+{% for s in stays %}<tr><td>{{ s.room }}</td><td>{{ s.assigned_at|dt }}</td><td>{{ s.released_at|dt if s.released_at else 'Current' }}</td></tr>{% endfor %}</tbody></table></div></div>{% endif %}
+{% endblock %}

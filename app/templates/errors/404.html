@@ -1,0 +1,3 @@
+{% extends "base.html" %}{% block title %}404{% endblock %}
+{% block content %}{% set body %}<div class="empty py-5"><div class="display-3 fw-bold" style="color:var(--teal)">404</div><h1 class="h3">Page not found</h1><p>{{ message|default("We could not find what you were looking for.") }}</p><a class="btn btn-primary" href="{{ url_for('main.index') }}">Go to my dashboard</a></div>{% endset %}{{ body }}{% endblock %}
+{% block public %}<div class="container py-5">{{ self.content() }}</div>{% endblock %}

@@ -1,0 +1,14 @@
+{% extends "base.html" %}{% block title %}Doctors{% endblock %}
+{% block content %}
+<div class="page-head"><h1>Doctors</h1><a class="btn btn-primary" href="{{ url_for('admin.new_doctor') }}">Add doctor</a></div>
+<div class="card mb-3"><div class="card-header">Consultation fees by specialization</div><div class="table-responsive"><table class="table mb-0"><tbody>
+{% for s in specs %}<tr><td>{{ s.name }}</td><td>{{ s.base_fee|inr }}</td><td class="text-end"><a class="btn btn-sm btn-outline-primary" href="{{ url_for('admin.edit_specialization', spec_id=s.id) }}">Change fee</a></td></tr>{% endfor %}</tbody></table></div></div>
+<form class="mb-3 d-flex gap-2" method="get"><input class="form-control" style="max-width:360px" name="q" value="{{ q }}" placeholder="Search name, specialization, ID" aria-label="Search doctors"><button class="btn btn-primary" type="submit">Search</button></form>
+<div class="card"><div class="table-responsive"><table class="table mb-0 align-middle"><thead><tr><th>ID</th><th>Name</th><th>Specialization</th><th>Fee</th><th>Schedule</th><th>Status</th><th></th></tr></thead><tbody>
+{% for d in page.items %}<tr><td>{{ d.doctor_code }}</td><td>Dr. {{ d.full_name }}<div class="small text-muted">{{ d.email }}</div></td><td>{{ d.specialization.name }}</td><td>{{ d.calculate_consultation_fee()|inr }}</td>
+<td class="small">{{ d.working_days_label }}<br>{{ d.start_time|tfmt }}–{{ d.end_time|tfmt }}</td>
+<td>{{ m.status('active' if d.user.active else 'suspended') }} {% if d.user.active %}<div class="small mt-1">{{ 'Accepting' if d.accepting_appointments else 'Not accepting' }}</div>{% endif %}</td>
+<td class="text-end text-nowrap"><a class="btn btn-sm btn-outline-primary" href="{{ url_for('admin.edit_doctor', doctor_id=d.id) }}">Edit</a>
+{{ m.post_btn(url_for('admin.toggle_availability', doctor_id=d.id), 'Stop bookings' if d.accepting_appointments else 'Allow bookings') }}
+{{ m.post_btn(url_for('admin.toggle_doctor', doctor_id=d.id), 'Deactivate' if d.user.active else 'Activate', 'btn btn-sm btn-outline-danger', ('Deactivate Dr. ' ~ d.full_name ~ '? They will no longer be able to sign in or take bookings.') if d.user.active else None) }}</td></tr>
+{% else %}<tr><td colspan="7">{{ m.empty('No doctors found.') }}</td></tr>{% endfor %}</tbody></table></div></div>{{ m.pager(page) }}{% endblock %}

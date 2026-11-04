@@ -1,0 +1,8 @@
+{% extends "base.html" %}{% block title %}Patients{% endblock %}
+{% block content %}
+<div class="page-head"><h1>Patients</h1></div>
+<form class="mb-3 d-flex gap-2" method="get"><input class="form-control" style="max-width:360px" name="q" value="{{ q }}" placeholder="Search name, ID, email, phone" aria-label="Search patients"><button class="btn btn-primary" type="submit">Search</button></form>
+<div class="card"><div class="table-responsive"><table class="table mb-0 align-middle"><thead><tr><th>ID</th><th>Name</th><th>Contact</th><th>Insurance</th><th>Outstanding</th><th>Status</th><th></th></tr></thead><tbody>
+{% for p in page.items %}<tr><td>{{ p.patient_code }}</td><td>{{ p.full_name }}</td><td>{{ p.email }}<div class="small text-muted">{{ p.phone or '' }}</div></td><td>{{ p.insurance_number or '-' }}</td><td>{{ outstanding(p)|inr }}</td><td>{{ m.status('active' if p.user.active else 'suspended') }}</td>
+<td class="text-end"><a class="btn btn-sm btn-outline-primary" href="{{ url_for('admin.edit_patient', patient_id=p.id) }}">Edit</a></td></tr>
+{% else %}<tr><td colspan="7">{{ m.empty('No patients found.') }}</td></tr>{% endfor %}</tbody></table></div></div>{{ m.pager(page) }}{% endblock %}

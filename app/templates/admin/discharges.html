@@ -1,0 +1,10 @@
+{% extends "base.html" %}{% block title %}Discharges{% endblock %}
+{% block content %}
+<div class="page-head"><h1>Discharge management</h1></div>
+<p class="text-muted">A patient can be discharged only when all four conditions are met. Discharge releases any assigned room.</p>
+{% for p, check in rows %}<div class="card mb-3"><div class="card-body"><div class="d-flex justify-content-between flex-wrap gap-2"><div><h2 class="h5 mb-0">{{ p.full_name }}</h2><div class="text-muted small">{{ p.patient_code }}</div></div>
+<div>{% if check.eligible %}<form method="post" action="{{ url_for('admin.discharge', patient_id=p.id) }}" data-confirm="Discharge {{ p.full_name }} and release any room?">{{ m.csrf() }}<button class="btn btn-success" type="submit">Discharge</button></form>
+{% else %}<form method="post" action="{{ url_for('admin.discharge', patient_id=p.id) }}">{{ m.csrf() }}<button class="btn btn-outline-secondary" type="submit" title="Shows why discharge is blocked">Try discharge</button></form>{% endif %}</div></div>
+<ul class="list-unstyled mt-3 mb-0">{% for c in check.conditions %}<li class="mb-1">{% if c.met %}<span class="badge text-bg-success">Met</span>{% else %}<span class="badge text-bg-danger">Unmet</span>{% endif %} <strong>{{ c.label }}</strong>{% if c.detail %} <span class="text-muted small">— {{ c.detail }}</span>{% endif %}</li>{% endfor %}</ul></div></div>
+{% else %}<div class="card"><div class="card-body">{{ m.empty('No patients are currently awaiting discharge.') }}</div></div>{% endfor %}
+<div class="card mt-4"><div class="card-header">Recent discharges</div><div class="table-responsive"><table class="table mb-0"><tbody>{% for d in history %}<tr><td>{{ d.discharged_at|dt }}</td><td>{{ d.patient.full_name }}</td><td>{{ ('Room released: ' ~ d.room_released) if d.room_released else 'No room' }}</td></tr>{% else %}<tr><td>{{ m.empty('No discharges yet.') }}</td></tr>{% endfor %}</tbody></table></div></div>{% endblock %}

@@ -1,0 +1,14 @@
+{% extends "base.html" %}{% block title %}Appointments{% endblock %}
+{% block content %}
+<div class="page-head"><h1>My appointments</h1><a class="btn btn-primary" href="{{ url_for('patient.doctors') }}">Book new</a></div>
+<ul class="nav nav-pills mb-3">{% for t, l in [('upcoming','Upcoming'),('pending','Pending payment'),('completed','Completed'),('cancelled','Cancelled'),('all','All')] %}
+<li class="nav-item"><a class="nav-link {{ 'active' if tab == t }}" href="{{ url_for('patient.appointments', tab=t) }}">{{ l }}</a></li>{% endfor %}</ul>
+<div class="card"><div class="table-responsive"><table class="table mb-0 align-middle">
+<thead><tr><th>Ref</th><th>When</th><th>Doctor</th><th>Fee</th><th>Status</th><th>Payment</th><th></th></tr></thead><tbody>
+{% for a in page.items %}<tr><td>{{ a.code }}</td><td>{{ a.start_time|dt }}</td><td>Dr. {{ a.doctor.full_name }}<br><span class="small text-muted">{{ a.doctor.specialization.name }}</span></td>
+ <td>{{ a.fee|inr }}</td><td>{{ m.status(a.status) }}</td><td>{{ m.status(a.payment_status) }}{% if a.refund_amount > 0 %}<div class="small text-muted">Refund {{ a.refund_amount|inr }}</div>{% endif %}</td>
+ <td class="text-end">{% if a.status == 'pending' %}<a class="btn btn-sm btn-primary" href="{{ url_for('payments.pay_appointment', appt_id=a.id) }}">Pay now</a>{% endif %}
+ {% if a.status in ('pending','scheduled') %}{{ m.post_btn(url_for('appointments.cancel', appt_id=a.id), 'Cancel', 'btn btn-sm btn-outline-danger', 'Cancel this appointment? Refund rules apply (full refund 24h+ ahead, otherwise 50%).') }}{% endif %}</td></tr>
+{% else %}<tr><td colspan="7">{{ m.empty('Nothing here yet.', url_for('patient.doctors'), 'Find a doctor') }}</td></tr>{% endfor %}</tbody></table></div></div>
+<p class="small text-muted mt-2">Cancellation policy: not possible within 2 hours of the start. Refund is 100% if cancelled 24 hours or more ahead, otherwise 50% (simulated).</p>
+{{ m.pager(page) }}{% endblock %}

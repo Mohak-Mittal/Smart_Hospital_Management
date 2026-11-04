@@ -1,0 +1,12 @@
+{% extends "base.html" %}{% block title %}Rooms{% endblock %}
+{% block content %}
+<div class="page-head"><h1>Rooms</h1><a class="btn btn-primary" href="{{ url_for('admin.new_room') }}">Add room</a></div>
+<div class="card mb-3"><div class="card-header">Daily rates</div><div class="table-responsive"><table class="table mb-0"><tbody>{% for t in types %}<tr><td>{{ t.name }}</td><td>{{ t.daily_rate|inr }} / day</td><td class="text-end"><a class="btn btn-sm btn-outline-primary" href="{{ url_for('admin.edit_room_type', type_id=t.id) }}">Change rate</a></td></tr>{% endfor %}</tbody></table></div>
+<div class="card-footer small text-muted bg-transparent">Charging rule: every started 24-hour period counts as one day, minimum one day.</div></div>
+<div class="card"><div class="table-responsive"><table class="table mb-0 align-middle"><thead><tr><th>Room</th><th>Type</th><th>Floor</th><th>Status</th><th>Occupant</th><th></th></tr></thead><tbody>
+{% for r in rooms %}{% set a = occupancy.get(r.id) %}<tr><td>{{ r.room_number }}</td><td>{{ r.room_type.name }}<div class="small text-muted">{{ r.room_type.daily_rate|inr(0) }}/day</div></td><td>{{ r.floor or '-' }}</td>
+<td>{% if not r.active %}<span class="badge text-bg-secondary">Out of service</span>{% elif a %}<span class="badge text-bg-danger">Occupied</span>{% else %}<span class="badge text-bg-success">Available</span>{% endif %}</td>
+<td>{% if a %}{{ a.patient.full_name }}<div class="small text-muted">since {{ a.assigned_at|dt }} · {{ stay_days(a) }} day(s) · {{ charge(a)|inr }}</div>{% else %}-{% endif %}</td>
+<td class="text-end text-nowrap"><a class="btn btn-sm btn-outline-secondary" href="{{ url_for('admin.edit_room', room_id=r.id) }}">Edit</a>
+{% if a %}{{ m.post_btn(url_for('admin.release_room', room_id=r.id), 'Release', 'btn btn-sm btn-outline-danger', 'Release room ' ~ r.room_number ~ '?') }}{% elif r.active %}<a class="btn btn-sm btn-primary" href="{{ url_for('admin.assign_room', room_id=r.id) }}">Assign</a>{% endif %}</td></tr>
+{% else %}<tr><td colspan="6">{{ m.empty('No rooms yet.') }}</td></tr>{% endfor %}</tbody></table></div></div>{% endblock %}

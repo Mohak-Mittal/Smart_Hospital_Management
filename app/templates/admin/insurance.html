@@ -1,0 +1,9 @@
+{% extends "base.html" %}{% block title %}Insurance{% endblock %}
+{% block content %}
+<div class="page-head"><h1>Insurance policies</h1><a class="btn btn-primary" href="{{ url_for('admin.new_policy') }}">Add policy</a></div>
+<form class="mb-3 d-flex gap-2" method="get"><input class="form-control" style="max-width:360px" name="q" value="{{ q }}" placeholder="Search patient, company, policy no." aria-label="Search policies"><button class="btn btn-primary" type="submit">Search</button></form>
+<div class="card"><div class="table-responsive"><table class="table mb-0 align-middle"><thead><tr><th>Policy no.</th><th>Patient</th><th>Company</th><th>Coverage</th><th>Max</th><th>Valid until</th><th>Status</th><th></th></tr></thead><tbody>
+{% for p in page.items %}<tr><td>{{ p.policy_number }}</td><td>{{ p.patient.full_name }}</td><td>{{ p.company_name }}</td><td>{{ p.coverage_percent|round(0)|int }}%</td><td>{{ p.max_coverage|inr(0) }}</td><td>{{ p.valid_until|dfmt }}</td><td>{{ m.status(p.status if p.is_valid_on(today) or p.status != 'active' else 'expired') }}</td>
+<td class="text-end"><a class="btn btn-sm btn-outline-primary" href="{{ url_for('admin.edit_policy', policy_id=p.id) }}">Edit</a></td></tr>
+{% else %}<tr><td colspan="8">{{ m.empty('No policies found.') }}</td></tr>{% endfor %}</tbody></table></div></div>{{ m.pager(page) }}
+<p class="small text-muted mt-2">Insurer share = lower of (bill × coverage %) and the policy maximum; it never exceeds the bill.</p>{% endblock %}

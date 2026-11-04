@@ -1,0 +1,18 @@
+{% extends "base.html" %}{% block title %}{{ title }}{% endblock %}
+{% block content %}
+<div class="page-head"><h1>{{ title }}</h1></div>
+<div class="row"><div class="col-lg-7"><div class="card"><div class="card-body">
+  <p class="demo-banner">{{ notice }}</p>
+  {% if appt %}<p>Dr. {{ appt.doctor.full_name }} · {{ appt.start_time|dt }}<br>Consultation fee: <strong>{{ appt.fee|inr }}</strong></p>
+  <p class="small text-muted">Slot held until you pay (15 min). Try card 4242 4242 4242 4242 (success) or 4000 0000 0000 0002 (declined); UPI ids ending in @fail are declined.</p>
+  {% else %}<p>Invoice {{ bill.invoice_number }} · Balance due: <strong>{{ bill.balance_due|inr }}</strong></p>{% endif %}
+  <form method="post" novalidate autocomplete="off">{{ form.hidden_tag() }}
+    {{ m.field(form.method, **{'data-method-select': '1'}) }}
+    {% if ask_amount %}{{ m.field(form.amount) }}{% endif %}
+    <div data-method-group="upi">{{ m.field(form.upi_id) }}</div>
+    <div data-method-group="card">{{ m.field(form.card_name) }}{{ m.field(form.card_number) }}
+      <div class="row"><div class="col-6">{{ m.field(form.card_expiry) }}</div><div class="col-6">{{ m.field(form.card_cvv) }}</div></div></div>
+    <div data-method-group="cash"><p class="text-muted">A demo cash receipt will be issued.</p></div>
+    <button class="btn btn-primary" type="submit">Pay {{ amount|inr }} (demo)</button>
+    <a class="btn btn-link" href="{{ cancel_url }}">Back</a>
+  </form></div></div></div></div>{% endblock %}

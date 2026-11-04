@@ -1,0 +1,7 @@
+{% extends "base.html" %}{% block title %}{{ patient.full_name }}{% endblock %}
+{% block content %}
+<div class="page-head"><div><h1>{{ patient.full_name }}</h1><div class="text-muted">{{ patient.patient_code }}{% if stay %} · {{ stay.room }}{% endif %}</div></div><a class="btn btn-outline-secondary btn-sm" href="{{ url_for('nurse.dashboard') }}">← My patients</a></div>
+{% for p in plans %}<div class="card mb-3"><div class="card-header">{{ p.type_label }} — {{ p.diagnosis }} {{ m.status(p.status) }}</div><div class="card-body">
+<ul class="timeline">{% for n in p.progress %}<li class="k-{{ n.kind }}"><div class="small text-muted">{{ n.created_at|dt }} · {{ n.kind|pretty }}</div><div class="pre-wrap">{{ n.note }}</div></li>{% else %}<li>No entries yet.</li>{% endfor %}</ul>
+{% if p.is_open %}<form method="post" action="{{ url_for('nurse.add_note', plan_id=p.id) }}" class="row g-2">{{ m.csrf() }}<div class="col-md-10"><input class="form-control form-control-sm" name="n-note" maxlength="2000" required placeholder="Add a nursing note" aria-label="Nursing note"></div><div class="col-md-2 d-grid"><button class="btn btn-sm btn-primary" type="submit">Add note</button></div></form>{% endif %}</div></div>
+{% else %}<div class="card"><div class="card-body">{{ m.empty('No treatment recorded for this patient.') }}</div></div>{% endfor %}{% endblock %}

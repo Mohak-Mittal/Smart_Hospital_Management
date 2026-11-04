@@ -1,0 +1,15 @@
+{% extends "base.html" %}{% block title %}Emergency queue{% endblock %}
+{% block content %}
+<div class="page-head"><h1>Emergency queue</h1><a class="btn btn-danger" href="{{ url_for('admin.new_emergency') }}">Add emergency case</a></div>
+<p class="text-muted">Most urgent first (Level 1 = Critical … Level 4 = Minor). Equal levels are served in arrival order.</p>
+<div class="card mb-3"><div class="card-header">Waiting ({{ waiting|length }})</div><div class="table-responsive"><table class="table mb-0 align-middle"><thead><tr><th>#</th><th>Priority</th><th>Patient</th><th>Complaint</th><th>Arrived</th><th>Actions</th></tr></thead><tbody>
+{% for c in waiting %}<tr><td>{{ loop.index }}</td><td><span class="badge text-bg-{{ priority_badge(c.priority) }}">{{ c.priority }} · {{ c.priority_label }}</span></td><td>{{ c.patient_name }}{% if c.age %} ({{ c.age }}){% endif %}<div class="small text-muted">{{ c.case_code }}{% if not c.patient_id %} · walk-in{% endif %}</div></td><td>{{ c.complaint }}</td><td>{{ c.arrived_at|dt }}</td>
+<td><div class="d-flex flex-wrap gap-1">
+<form method="post" action="{{ url_for('admin.emergency_priority', case_id=c.id) }}" class="d-flex gap-1">{{ m.csrf() }}<select class="form-select form-select-sm" name="priority" aria-label="Priority">{% for n in [1,2,3,4] %}<option value="{{ n }}" {{ 'selected' if c.priority == n }}>{{ n }}</option>{% endfor %}</select><button class="btn btn-sm btn-outline-secondary" type="submit">Set</button></form>
+<form method="post" action="{{ url_for('admin.emergency_assign', case_id=c.id) }}" class="d-flex gap-1">{{ m.csrf() }}<select class="form-select form-select-sm" name="doctor_id" aria-label="Doctor">{% for d in doctors %}<option value="{{ d.id }}">Dr. {{ d.full_name }}</option>{% endfor %}</select><button class="btn btn-sm btn-primary" type="submit">Assign</button></form></div></td></tr>
+{% else %}<tr><td colspan="6">{{ m.empty('No one is waiting.') }}</td></tr>{% endfor %}</tbody></table></div></div>
+<div class="card mb-3"><div class="card-header">In treatment ({{ active|length }})</div><div class="table-responsive"><table class="table mb-0 align-middle"><tbody>
+{% for c in active %}<tr><td><span class="badge text-bg-{{ priority_badge(c.priority) }}">{{ c.priority_label }}</span></td><td>{{ c.patient_name }}<div class="small text-muted">{{ c.complaint }}</div></td><td>{{ ('Dr. ' ~ c.assigned_doctor.full_name) if c.assigned_doctor else '' }}</td>
+<td class="text-end">{{ m.post_btn(url_for('admin.emergency_status', case_id=c.id), 'Mark resolved', 'btn btn-sm btn-success', 'Mark this emergency as resolved?', {'status': 'resolved'}) }}</td></tr>
+{% else %}<tr><td>{{ m.empty('No active emergency treatment.') }}</td></tr>{% endfor %}</tbody></table></div></div>
+{% if recent %}<div class="card"><div class="card-header">Recently resolved</div><ul class="list-group list-group-flush">{% for c in recent %}<li class="list-group-item small">{{ c.case_code }} · {{ c.patient_name }} · {{ c.priority_label }}</li>{% endfor %}</ul></div>{% endif %}{% endblock %}

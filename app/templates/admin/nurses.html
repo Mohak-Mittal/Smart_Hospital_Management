@@ -1,0 +1,8 @@
+{% extends "base.html" %}{% block title %}Nurses{% endblock %}
+{% block content %}
+<div class="page-head"><h1>Nurses</h1><a class="btn btn-primary" href="{{ url_for('admin.new_nurse') }}">Add nurse</a></div>
+<div class="card"><div class="table-responsive"><table class="table mb-0 align-middle"><thead><tr><th>ID</th><th>Name</th><th>Ward / shift</th><th>Patients</th><th>Status</th><th></th></tr></thead><tbody>
+{% for n in page.items %}<tr><td>{{ n.nurse_code }}</td><td>{{ n.full_name }}<div class="small text-muted">{{ n.email }}</div></td><td>{{ n.ward or '-' }} · {{ n.shift }}</td><td>{{ n.assigned_patients|length }}</td><td>{{ m.status('active' if n.user.active else 'suspended') }}</td>
+<td class="text-end text-nowrap"><a class="btn btn-sm btn-outline-secondary" href="{{ url_for('admin.nurse_patients', nurse_id=n.id) }}">Patients</a> <a class="btn btn-sm btn-outline-primary" href="{{ url_for('admin.edit_nurse', nurse_id=n.id) }}">Edit</a>
+{{ m.post_btn(url_for('admin.toggle_nurse', nurse_id=n.id), 'Deactivate' if n.user.active else 'Activate', 'btn btn-sm btn-outline-danger', 'Deactivate this nurse account?' if n.user.active else None) }}</td></tr>
+{% else %}<tr><td colspan="6">{{ m.empty('No nurses yet.', url_for('admin.new_nurse'), 'Add nurse') }}</td></tr>{% endfor %}</tbody></table></div></div>{{ m.pager(page) }}{% endblock %}

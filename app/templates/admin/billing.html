@@ -1,0 +1,9 @@
+{% extends "base.html" %}{% block title %}Billing{% endblock %}
+{% block content %}
+<div class="page-head"><h1>Billing</h1><a class="btn btn-primary" href="{{ url_for('admin.new_bill') }}">Generate bill</a></div>
+<form class="card card-body mb-3" method="get"><div class="row g-2 align-items-end"><div class="col-md-5"><label class="form-label" for="q">Search</label><input class="form-control" id="q" name="q" value="{{ q }}" placeholder="Patient, ID or invoice number"></div>
+<div class="col-md-3"><label class="form-label" for="status">Status</label><select class="form-select" id="status" name="status"><option value="">All</option>{% for s in ['PENDING','PARTIALLY_PAID','PAID'] %}<option value="{{ s }}" {{ 'selected' if status == s }}>{{ s|pretty }}</option>{% endfor %}</select></div><div class="col-md-2"><button class="btn btn-primary" type="submit">Filter</button></div></div></form>
+<div class="card"><div class="table-responsive"><table class="table mb-0 align-middle"><thead><tr><th>Invoice</th><th>Patient</th><th>Date</th><th>Subtotal</th><th>Insurance</th><th>Patient share</th><th>Balance</th><th>Status</th><th></th></tr></thead><tbody>
+{% for b in page.items %}<tr><td>{{ b.invoice_number }}</td><td>{{ b.patient.full_name }}</td><td>{{ b.created_at|dfmt }}</td><td>{{ b.subtotal|inr }}</td><td>{{ b.insurance_coverage|inr }}</td><td>{{ b.final_amount|inr }}</td><td>{{ b.balance_due|inr }}</td><td>{{ m.status(b.status) }}</td>
+<td class="text-end text-nowrap"><a class="btn btn-sm btn-outline-primary" href="{{ url_for('admin.bill_detail', bill_id=b.id) }}">Open</a> <a class="btn btn-sm btn-outline-secondary" href="{{ url_for('reports.invoice_pdf', bill_id=b.id) }}">PDF</a></td></tr>
+{% else %}<tr><td colspan="9">{{ m.empty('No bills found.') }}</td></tr>{% endfor %}</tbody></table></div></div>{{ m.pager(page) }}{% endblock %}

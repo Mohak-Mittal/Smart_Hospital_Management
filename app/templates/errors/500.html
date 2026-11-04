@@ -1,0 +1,3 @@
+{% extends "base.html" %}{% block title %}500{% endblock %}
+{% block content %}{% set body %}<div class="empty py-5"><div class="display-3 fw-bold" style="color:var(--teal)">500</div><h1 class="h3">Something went wrong</h1><p>{{ message|default("An unexpected error occurred. Nothing was saved. Please try again.") }}</p><a class="btn btn-primary" href="{{ url_for('main.index') }}">Go to my dashboard</a></div>{% endset %}{{ body }}{% endblock %}
+{% block public %}<div class="container py-5">{{ self.content() }}</div>{% endblock %}

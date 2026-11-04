@@ -1,0 +1,17 @@
+{% extends "base.html" %}{% block title %}Admin dashboard{% endblock %}
+{% block content %}
+<div class="page-head"><h1>Hospital overview</h1><span class="text-muted">{{ hospital_now()|dt }}</span></div>
+<div class="row g-3 mb-3">
+ <div class="col-6 col-lg-3">{{ m.kpi('Patients', stats.patients, '', 'accent') }}</div><div class="col-6 col-lg-3">{{ m.kpi('Doctors', stats.doctors, '', 'accent') }}</div>
+ <div class="col-6 col-lg-3">{{ m.kpi('Nurses', stats.nurses, '', 'accent') }}</div><div class="col-6 col-lg-3">{{ m.kpi('Emergency queue', stats.emergency, 'waiting', 'danger' if stats.emergency else '') }}</div>
+ <div class="col-6 col-lg-3">{{ m.kpi("Today's appointments", stats.today) }}</div><div class="col-6 col-lg-3">{{ m.kpi('Upcoming', stats.upcoming, 'after today') }}</div>
+ <div class="col-6 col-lg-3">{{ m.kpi('Rooms', stats.rooms_occupied ~ ' / ' ~ stats.rooms_total, stats.rooms_free ~ ' available') }}</div>
+ <div class="col-6 col-lg-3">{{ m.kpi('Pending bills', stats.pending_bills, stats.pending_amount|inr ~ ' due', 'warn' if stats.pending_bills else '') }}</div></div>
+<div class="row g-3 mb-3"><div class="col-lg-5"><div class="card h-100"><div class="card-header">Appointments by status</div><div class="card-body"><canvas id="statusChart" height="220" aria-label="Appointments by status" role="img"></canvas></div></div></div>
+ <div class="col-lg-7"><div class="card h-100"><div class="card-header">Payments received (last 7 days)</div><div class="card-body"><canvas id="revenueChart" height="140" aria-label="Payments last 7 days" role="img"></canvas></div></div></div></div>
+<div id="chart-data" data-chart='{{ chart|tojson }}' hidden></div>
+<div class="row g-3"><div class="col-lg-6"><div class="card h-100"><div class="card-header d-flex justify-content-between">Medicine stock alerts <a href="{{ url_for('admin.medicines', low=1) }}" class="small">View all</a></div>
+ <div class="table-responsive"><table class="table mb-0"><tbody>{% for med in low %}<tr><td>{{ med.name }}</td><td class="text-end"><span class="badge text-bg-{{ 'danger' if med.quantity == 0 else 'warning' }}">{{ med.quantity }} left</span></td></tr>{% else %}<tr><td>{{ m.empty('All stock levels are healthy.') }}</td></tr>{% endfor %}</tbody></table></div></div></div>
+ <div class="col-lg-6"><div class="card h-100"><div class="card-header">Recent activity</div><ul class="list-group list-group-flush">{% for a in activity %}<li class="list-group-item small d-flex justify-content-between"><span>{{ a.message }}</span><span class="text-muted ms-2 text-nowrap">{{ a.created_at|dt }}</span></li>{% else %}<li class="list-group-item">{{ m.empty('No activity yet.') }}</li>{% endfor %}</ul></div></div></div>
+{% endblock %}
+{% block scripts %}<script src="{{ url_for('static', filename='vendor/chart.umd.js') }}"></script>{% endblock %}

@@ -1,0 +1,7 @@
+{% extends "base.html" %}{% block title %}Nurse dashboard{% endblock %}
+{% block content %}
+<div class="page-head"><div><h1>My patients</h1><div class="text-muted">{{ nurse.nurse_code }} · {{ nurse.ward or 'No ward set' }} · {{ nurse.shift }} shift</div></div></div>
+<div class="card"><div class="table-responsive"><table class="table mb-0 align-middle"><thead><tr><th>Patient</th><th>Room</th><th>Treatment</th><th>Status</th><th></th></tr></thead><tbody>
+{% for p, plan, stay in rows %}<tr><td>{{ p.full_name }}<div class="small text-muted">{{ p.patient_code }}</div></td><td>{{ stay.room if stay else '-' }}</td><td>{{ plan.type_label ~ ' — ' ~ plan.diagnosis if plan else '-' }}</td><td>{% if plan %}{{ m.status(plan.status) }}{% endif %}</td>
+<td class="text-end"><a class="btn btn-sm btn-primary" href="{{ url_for('nurse.patient_detail', patient_id=p.id) }}">Open</a></td></tr>
+{% else %}<tr><td colspan="5">{{ m.empty('No patients are assigned to you yet. Reception can assign patients.') }}</td></tr>{% endfor %}</tbody></table></div></div>{% endblock %}

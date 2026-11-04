@@ -1,0 +1,5 @@
+{% extends "base.html" %}{% block title %}{{ report.title }}{% endblock %}
+{% block content %}
+<div class="page-head"><h1>{{ report.title }}</h1><div><a class="btn btn-outline-secondary btn-sm" href="{{ url_for('patient.reports') }}">← Reports</a> <a class="btn btn-primary btn-sm" href="{{ url_for('reports.report_pdf', report_id=report.id) }}">Download PDF</a></div></div>
+<div class="card"><div class="card-body"><p class="text-muted">{{ report.report_code }} · Dr. {{ report.doctor.full_name }} ({{ report.doctor.specialization.name }}) · {{ report.published_at|dt }}</p>
+<div class="pre-wrap">{{ report.content }}</div><p class="demo-banner mt-3">Demo data — not real medical advice.</p></div></div>{% endblock %}

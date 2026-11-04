@@ -1,0 +1,8 @@
+{% extends "base.html" %}{% block title %}Medical reports{% endblock %}
+{% block content %}
+<div class="page-head"><h1>Medical reports</h1></div>
+<div class="card"><div class="table-responsive"><table class="table mb-0 align-middle"><thead><tr><th>Ref</th><th>Title</th><th>Doctor</th><th>Published</th><th></th></tr></thead><tbody>
+{% for r in page.items %}<tr><td>{{ r.report_code }}</td><td>{{ r.title }}</td><td>Dr. {{ r.doctor.full_name }}</td><td>{{ r.published_at|dfmt }}</td>
+<td class="text-end"><a class="btn btn-sm btn-outline-primary" href="{{ url_for('patient.report_detail', report_id=r.id) }}">View</a> <a class="btn btn-sm btn-primary" href="{{ url_for('reports.report_pdf', report_id=r.id) }}">PDF</a></td></tr>
+{% else %}<tr><td colspan="5">{{ m.empty('No reports have been published for you yet.') }}</td></tr>{% endfor %}</tbody></table></div></div>
+{{ m.pager(page) }}{% endblock %}

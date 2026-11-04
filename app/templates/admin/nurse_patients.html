@@ -1,0 +1,7 @@
+{% extends "base.html" %}{% block title %}Patients of {{ nurse.full_name }}{% endblock %}
+{% block content %}
+<div class="page-head"><h1>Patients assigned to {{ nurse.full_name }}</h1><a class="btn btn-outline-secondary btn-sm" href="{{ url_for('admin.nurses') }}">← Nurses</a></div>
+<div class="row g-3"><div class="col-lg-7"><div class="card"><div class="table-responsive"><table class="table mb-0 align-middle"><tbody>
+{% for p in nurse.assigned_patients %}<tr><td>{{ p.patient_code }}</td><td>{{ p.full_name }}</td><td class="text-end">{{ m.post_btn(url_for('admin.nurse_unassign', nurse_id=nurse.id, patient_id=p.id), 'Remove', 'btn btn-sm btn-outline-danger', 'Remove this patient from the nurse?') }}</td></tr>
+{% else %}<tr><td>{{ m.empty('No patients assigned.') }}</td></tr>{% endfor %}</tbody></table></div></div></div>
+<div class="col-lg-5"><div class="card"><div class="card-body"><form method="post">{{ form.hidden_tag() }}{{ m.field(form.patient_id) }}<button class="btn btn-primary" type="submit">Assign patient</button></form></div></div></div></div>{% endblock %}

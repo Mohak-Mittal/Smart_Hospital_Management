@@ -1,0 +1,34 @@
+{% import "components/macros.html" as m with context %}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}{{ HOSPITAL_NAME }}{% endblock %} · Smart Hospital (Demo)</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='vendor/bootstrap.min.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+<div class="demo-strip" role="note">DEMO SYSTEM — sample data only. Payments are simulated and no real money is charged. Not for real clinical or production use.</div>
+{% if current_user.is_authenticated %}
+<div class="mobile-bar"><strong>{{ HOSPITAL_NAME }}</strong><button class="btn btn-sm btn-outline-light" data-toggle-sidebar type="button" aria-label="Open menu">Menu</button></div>
+<div class="app-shell">
+  {% include "components/sidebar.html" %}
+  <main class="content" id="main">
+    {% include "components/flash_messages.html" %}
+    {% block content %}{% endblock %}
+    <p class="footer-note no-print">Clinical content shown here is demo data and is not medical advice.</p>
+  </main>
+</div>
+{% else %}
+{% include "components/navbar.html" %}
+<main id="main">
+  <div class="container pt-3">{% include "components/flash_messages.html" %}</div>
+  {% block public %}{% endblock %}
+</main>
+<footer class="container footer-note pb-4">© Demo project · Not a certified clinical system · No real payments.</footer>
+{% endif %}
+<script src="{{ url_for('static', filename='vendor/bootstrap.bundle.min.js') }}"></script>
+{% block scripts %}{% endblock %}
+<script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>

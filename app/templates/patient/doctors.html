@@ -1,0 +1,19 @@
+{% extends "base.html" %}{% block title %}Find a doctor{% endblock %}
+{% block content %}
+<div class="page-head"><h1>Find a doctor</h1></div>
+<form class="card card-body mb-3" method="get"><div class="row g-2 align-items-end">
+  <div class="col-md-4"><label class="form-label" for="q">Name, specialization or department</label><input class="form-control" id="q" name="q" value="{{ q }}"></div>
+  <div class="col-md-3"><label class="form-label" for="specialization">Specialization</label><select class="form-select" id="specialization" name="specialization"><option value="">All</option>{% for s in specs %}<option value="{{ s.id }}" {{ 'selected' if spec == s.id }}>{{ s.name }}</option>{% endfor %}</select></div>
+  <div class="col-md-2"><label class="form-label" for="department">Department</label><input class="form-control" id="department" name="department" value="{{ dept }}"></div>
+  <div class="col-md-2"><label class="form-label" for="max_fee">Max fee (₹)</label><input class="form-control" id="max_fee" name="max_fee" type="number" min="0" step="1" value="{{ max_fee }}"></div>
+  <div class="col-md-1 d-grid"><button class="btn btn-primary" type="submit">Search</button></div></div></form>
+<div class="row g-3">{% for d in page.items %}
+  <div class="col-md-6 col-xl-4"><div class="card h-100"><div class="card-body">
+    <h2 class="h5 mb-0">Dr. {{ d.full_name }}</h2><div class="text-muted mb-2">{{ d.specialization.name }}{% if d.department %} · {{ d.department }}{% endif %}</div>
+    <div class="small">{{ d.qualification }}{% if d.experience_years %} · {{ d.experience_years }} yrs{% endif %}</div>
+    <div class="fs-5 fw-bold mt-2" style="color:var(--teal-dark)">{{ d.calculate_consultation_fee()|inr(0) }}</div>
+    <div class="small text-muted">{{ d.working_days_label }}, {{ d.start_time|tfmt }}–{{ d.end_time|tfmt }}</div>
+    {% if not d.is_bookable %}<span class="badge text-bg-secondary mt-2">Not accepting appointments</span>{% endif %}
+  </div><div class="card-footer bg-transparent"><a class="btn btn-sm btn-primary" href="{{ url_for('patient.doctor_detail', doctor_id=d.id) }}">View profile &amp; slots</a></div></div></div>
+{% else %}<div class="col-12">{{ m.empty('No doctors match your search.') }}</div>{% endfor %}</div>
+{{ m.pager(page) }}{% endblock %}

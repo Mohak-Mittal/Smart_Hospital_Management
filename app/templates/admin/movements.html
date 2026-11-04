@@ -1,0 +1,6 @@
+{% extends "base.html" %}{% block title %}Stock history{% endblock %}
+{% block content %}
+<div class="page-head"><h1>Stock history — {{ med.name }}</h1><a class="btn btn-outline-secondary btn-sm" href="{{ url_for('admin.medicines') }}">← Medicines</a></div>
+<div class="card"><div class="table-responsive"><table class="table mb-0"><thead><tr><th>When</th><th>Change</th><th>Balance</th><th>Reason</th><th>By</th></tr></thead><tbody>
+{% for mv in page.items %}<tr><td>{{ mv.created_at|dt }}</td><td class="{{ 'text-success' if mv.change > 0 else 'text-danger' }}">{{ '%+d' % mv.change }}</td><td>{{ mv.balance_after }}</td><td>{{ mv.reason }}</td><td>{{ mv.user.name if mv.user else '' }}</td></tr>
+{% else %}<tr><td colspan="5">{{ m.empty('No stock movements recorded.') }}</td></tr>{% endfor %}</tbody></table></div></div>{{ m.pager(page) }}{% endblock %}

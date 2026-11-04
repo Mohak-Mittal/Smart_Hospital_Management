@@ -1,0 +1,16 @@
+{% extends "base.html" %}{% block title %}Receipt {{ txn.txn_ref }}{% endblock %}
+{% block content %}
+<div class="page-head"><h1>Payment receipt</h1><div class="no-print"><button class="btn btn-outline-secondary btn-sm" data-print type="button">Print</button>
+ <a class="btn btn-primary btn-sm" href="{{ url_for('patient.appointments') if current_user.role == 'patient' else url_for('admin.billing') }}">Continue</a></div></div>
+<div class="card" style="max-width:560px"><div class="card-body">
+  <p class="demo-banner">{{ notice }}</p>
+  <dl class="row mb-0">
+    <dt class="col-5">Receipt / ref</dt><dd class="col-7">{{ txn.txn_ref }}</dd>
+    <dt class="col-5">Status</dt><dd class="col-7">{{ m.status(txn.status) }}</dd>
+    <dt class="col-5">Amount</dt><dd class="col-7">{{ txn.amount|inr }}</dd>
+    <dt class="col-5">Method</dt><dd class="col-7">{{ txn.method|upper }} {{ txn.detail or '' }}</dd>
+    <dt class="col-5">Date</dt><dd class="col-7">{{ txn.created_at|dt }}</dd>
+    <dt class="col-5">Patient</dt><dd class="col-7">{{ txn.patient.full_name }}</dd>
+    {% if txn.appointment %}<dt class="col-5">Appointment</dt><dd class="col-7">{{ txn.appointment.code }} · {{ txn.appointment.start_time|dt }} · Dr. {{ txn.appointment.doctor.full_name }}</dd>{% endif %}
+    {% if txn.bill %}<dt class="col-5">Invoice</dt><dd class="col-7">{{ txn.bill.invoice_number }}</dd>{% endif %}
+  </dl></div></div>{% endblock %}

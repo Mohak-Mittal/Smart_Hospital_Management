@@ -1,0 +1,26 @@
+{% extends "base.html" %}{% block title %}Dr. {{ doctor.full_name }}{% endblock %}
+{% block content %}
+<div class="page-head"><h1>Dr. {{ doctor.full_name }}</h1><a class="btn btn-outline-secondary btn-sm" href="{{ url_for('patient.doctors') }}">← All doctors</a></div>
+<div class="row g-3"><div class="col-lg-4"><div class="card"><div class="card-body">
+  <div class="text-muted">{{ doctor.specialization.name }}{% if doctor.department %} · {{ doctor.department }}{% endif %}</div>
+  <div class="fs-3 fw-bold" style="color:var(--teal-dark)">{{ doctor.calculate_consultation_fee()|inr }}</div><div class="small text-muted mb-3">Consultation fee</div>
+  <p class="small mb-1"><strong>Qualification:</strong> {{ doctor.qualification or '-' }}</p><p class="small mb-1"><strong>Experience:</strong> {{ doctor.experience_years or 0 }} years</p>
+  <p class="small mb-1"><strong>Working days:</strong> {{ doctor.working_days_label }}</p><p class="small mb-3"><strong>Hours:</strong> {{ doctor.start_time|tfmt }} – {{ doctor.end_time|tfmt }} ({{ doctor.slot_minutes }}-min slots)</p>
+  <p>{{ doctor.bio }}</p></div></div></div>
+<div class="col-lg-8"><div class="card"><div class="card-header">Available slots</div><div class="card-body">
+  {% if not doctor.is_bookable %}<div class="alert alert-warning mb-0">This doctor is not accepting appointments right now.</div>
+  {% elif not days %}{{ m.empty('No free slots in the next two weeks.') }}
+  {% else %}
+  <div class="mb-3">{% for d in days %}<a class="btn btn-sm {{ 'btn-primary' if d == chosen else 'btn-outline-primary' }} me-1 mb-1" href="{{ url_for('patient.doctor_detail', doctor_id=doctor.id, date=d.isoformat()) }}">{{ d.strftime('%a %d %b') }}</a>{% endfor %}</div>
+  <h2 class="h6">{{ chosen.strftime('%A, %d %B %Y') }}</h2>
+  {% if slots %}
+  <form method="post" action="{{ url_for('appointments.book') }}">{{ m.csrf() }}<input type="hidden" name="doctor_id" value="{{ doctor.id }}">
+    <div class="mb-3" role="radiogroup" aria-label="Time slots">{% for s in slots %}
+      <input type="radio" class="btn-check" name="slot" id="slot{{ loop.index }}" value="{{ s.strftime('%Y-%m-%dT%H:%M') }}" required>
+      <label class="btn btn-outline-primary slot-btn me-1 mb-1" for="slot{{ loop.index }}">{{ s|tfmt }}</label>{% endfor %}</div>
+    <div class="mb-3"><label class="form-label" for="reason">Reason for visit (optional)</label><input class="form-control" id="reason" name="reason" maxlength="255"></div>
+    <button class="btn btn-primary" type="submit">Reserve slot &amp; continue to payment</button>
+    <div class="small text-muted mt-2">Your slot is held for 15 minutes. The booking is confirmed only after the demo payment succeeds.</div>
+  </form>
+  {% else %}<p class="text-muted">No free slots on this day. Pick another date.</p>{% endif %}{% endif %}
+</div></div></div></div>{% endblock %}

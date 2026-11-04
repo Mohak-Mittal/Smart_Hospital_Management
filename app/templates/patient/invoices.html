@@ -1,0 +1,14 @@
+{% extends "base.html" %}{% block title %}Invoices & payments{% endblock %}
+{% block content %}
+<div class="page-head"><h1>Invoices &amp; payments</h1></div>
+<div class="row g-3 mb-3"><div class="col-md-4">{{ m.kpi('Outstanding balance', outstanding|inr, '', 'danger' if outstanding > 0 else 'accent') }}</div>
+<div class="col-md-8"><div class="card h-100 kpi"><div class="label">Insurance</div>{% if policy %}<div class="fw-semibold">{{ policy.company_name }} {{ policy.masked_number }}</div>
+<div class="sub">Covers {{ policy.coverage_percent|round(0)|int }}% of a bill, up to {{ policy.max_coverage|inr(0) }}. Valid until {{ policy.valid_until|dfmt }}. Example: a ₹50,000 bill → insurer pays {{ policy.calculate_coverage(50000)|inr(0) }}, you pay {{ (50000 - policy.calculate_coverage(50000))|inr(0) }}.</div>{% else %}<div class="sub">No active policy linked to your account.</div>{% endif %}</div></div></div>
+<div class="card mb-3"><div class="card-header">Invoices</div><div class="table-responsive"><table class="table mb-0 align-middle"><thead><tr><th>Invoice</th><th>Date</th><th>Subtotal</th><th>Insurance</th><th>You pay</th><th>Paid</th><th>Balance</th><th>Status</th><th></th></tr></thead><tbody>
+{% for b in page.items %}<tr><td>{{ b.invoice_number }}</td><td>{{ b.created_at|dfmt }}</td><td>{{ b.subtotal|inr }}</td><td>{{ b.insurance_coverage|inr }}</td><td>{{ b.final_amount|inr }}</td><td>{{ b.amount_paid|inr }}</td><td>{{ b.balance_due|inr }}</td><td>{{ m.status(b.status) }}</td>
+<td class="text-end text-nowrap"><a class="btn btn-sm btn-outline-secondary" href="{{ url_for('reports.invoice_view', bill_id=b.id) }}">View</a> <a class="btn btn-sm btn-outline-primary" href="{{ url_for('reports.invoice_pdf', bill_id=b.id) }}">PDF</a>{% if b.balance_due > 0 %} <a class="btn btn-sm btn-primary" href="{{ url_for('payments.pay_bill', bill_id=b.id) }}">Pay</a>{% endif %}</td></tr>
+{% else %}<tr><td colspan="9">{{ m.empty('No invoices yet.') }}</td></tr>{% endfor %}</tbody></table></div></div>
+{{ m.pager(page) }}
+<div class="card"><div class="card-header">Payment history</div><div class="table-responsive"><table class="table mb-0"><thead><tr><th>Date</th><th>Ref</th><th>For</th><th>Method</th><th>Amount</th><th>Status</th></tr></thead><tbody>
+{% for t in payments %}<tr><td>{{ t.created_at|dt }}</td><td><a href="{{ url_for('payments.receipt', txn_id=t.id) }}">{{ t.txn_ref }}</a></td><td>{{ 'Consultation' if t.kind == 'consultation' else ('Insurer share' if t.kind == 'insurer' else 'Invoice') }}</td><td>{{ t.method|upper }} {{ t.detail or '' }}</td><td>{{ t.amount|inr }}</td><td>{{ m.status(t.status) }}</td></tr>
+{% else %}<tr><td colspan="6">{{ m.empty('No payments yet.') }}</td></tr>{% endfor %}</tbody></table></div></div>{% endblock %}

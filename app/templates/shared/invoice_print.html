@@ -1,0 +1,20 @@
+{% extends "base.html" %}{% block title %}Invoice {{ bill.invoice_number }}{% endblock %}
+{% block content %}
+<div class="page-head no-print"><h1>Invoice {{ bill.invoice_number }}</h1><div>
+  <button class="btn btn-outline-secondary btn-sm" data-print type="button">Print</button>
+  <a class="btn btn-primary btn-sm" href="{{ url_for('reports.invoice_pdf', bill_id=bill.id) }}">Download PDF</a></div></div>
+<div class="card"><div class="card-body">
+  <h2 class="h4">{{ HOSPITAL_NAME }}</h2>
+  <p class="text-muted mb-1">Invoice {{ bill.invoice_number }} · {{ bill.created_at|dfmt }} · {{ m.status(bill.status) }}</p>
+  <p><strong>Patient:</strong> {{ bill.patient.full_name }} ({{ bill.patient.patient_code }})</p>
+  <div class="table-responsive"><table class="table table-sm">
+    <thead><tr><th>Category</th><th>Description</th><th class="text-end">Qty</th><th class="text-end">Unit</th><th class="text-end">Amount</th></tr></thead>
+    <tbody>{% for i in bill.items %}<tr><td>{{ i.category|title }}</td><td>{{ i.description }}</td><td class="text-end">{{ i.quantity }}</td><td class="text-end">{{ i.unit_price|inr }}</td><td class="text-end">{{ i.amount|inr }}</td></tr>{% endfor %}</tbody></table></div>
+  <dl class="row justify-content-end"><dt class="col-6 col-md-4">Subtotal</dt><dd class="col-6 col-md-3 text-end">{{ bill.subtotal|inr }}</dd>
+    {% if bill.insurance_coverage > 0 %}<dt class="col-6 col-md-4">Less insurance ({{ bill.policy.company_name }})</dt><dd class="col-6 col-md-3 text-end">- {{ bill.insurance_coverage|inr }}</dd>{% endif %}
+    <dt class="col-6 col-md-4">Patient share</dt><dd class="col-6 col-md-3 text-end">{{ bill.final_amount|inr }}</dd>
+    <dt class="col-6 col-md-4">Paid</dt><dd class="col-6 col-md-3 text-end">{{ bill.amount_paid|inr }}</dd>
+    <dt class="col-6 col-md-4">Outstanding</dt><dd class="col-6 col-md-3 text-end fw-bold">{{ bill.balance_due|inr }}</dd></dl>
+  <p class="demo-banner">DEMO PAYMENT — NO REAL MONEY IS CHARGED</p>
+</div></div>
+{% endblock %}

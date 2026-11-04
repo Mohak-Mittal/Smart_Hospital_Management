@@ -1,0 +1,10 @@
+{% extends "base.html" %}{% block title %}Medicines{% endblock %}
+{% block content %}
+<div class="page-head"><h1>Medicine inventory</h1><a class="btn btn-primary" href="{{ url_for('admin.new_medicine') }}">Add medicine</a></div>
+<form class="mb-3 d-flex gap-2 flex-wrap" method="get"><input class="form-control" style="max-width:320px" name="q" value="{{ q }}" placeholder="Search name, category, ID" aria-label="Search medicines">
+<div class="form-check align-self-center"><input class="form-check-input" type="checkbox" name="low" value="1" id="low" {{ 'checked' if low }}><label class="form-check-label" for="low">Low stock only</label></div><button class="btn btn-primary" type="submit">Filter</button></form>
+<div class="card"><div class="table-responsive"><table class="table mb-0 align-middle"><thead><tr><th>ID</th><th>Name</th><th>Category</th><th>Price</th><th>In stock</th><th></th></tr></thead><tbody>
+{% for med in page.items %}<tr><td>{{ med.medicine_code }}</td><td>{{ med.name }}{% if not med.active %} <span class="badge text-bg-secondary">inactive</span>{% endif %}</td><td>{{ med.category }}</td><td>{{ med.price|inr }}</td>
+<td><span class="badge text-bg-{{ 'danger' if med.quantity == 0 else ('warning' if med.is_low else 'success') }}">{{ med.quantity }}</span></td>
+<td class="text-end text-nowrap"><a class="btn btn-sm btn-outline-success" href="{{ url_for('admin.add_stock', med_id=med.id) }}">+ Stock</a> <a class="btn btn-sm btn-outline-warning" href="{{ url_for('admin.remove_stock', med_id=med.id) }}">− Stock</a> <a class="btn btn-sm btn-outline-secondary" href="{{ url_for('admin.movements', med_id=med.id) }}">History</a> <a class="btn btn-sm btn-outline-primary" href="{{ url_for('admin.edit_medicine', med_id=med.id) }}">Edit</a></td></tr>
+{% else %}<tr><td colspan="6">{{ m.empty('No medicines found.') }}</td></tr>{% endfor %}</tbody></table></div></div>{{ m.pager(page) }}{% endblock %}

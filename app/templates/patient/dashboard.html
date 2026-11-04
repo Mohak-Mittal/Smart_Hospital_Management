@@ -1,0 +1,21 @@
+{% extends "base.html" %}{% block title %}My dashboard{% endblock %}
+{% block content %}
+<div class="page-head"><div><h1>Hello, {{ current_user.name.split()[0] }}</h1><div class="text-muted">Patient ID {{ patient.patient_code }}</div></div>
+  <a class="btn btn-primary" href="{{ url_for('patient.doctors') }}">Book an appointment</a></div>
+<div class="row g-3 mb-3">
+  <div class="col-6 col-lg-3">{{ m.kpi('Upcoming', upcoming|length, 'confirmed appointments', 'accent') }}</div>
+  <div class="col-6 col-lg-3">{{ m.kpi('Awaiting payment', pending, 'held slots', 'warn' if pending else '') }}</div>
+  <div class="col-6 col-lg-3">{{ m.kpi('Outstanding', outstanding|inr, 'across invoices', 'danger' if outstanding > 0 else '') }}</div>
+  <div class="col-6 col-lg-3">{{ m.kpi('Reports', report_count, 'published for you') }}</div>
+</div>
+<div class="row g-3">
+  <div class="col-lg-7"><div class="card h-100"><div class="card-header">Upcoming appointments</div><div class="card-body">
+    {% if upcoming %}<ul class="list-group list-group-flush">{% for a in upcoming %}<li class="list-group-item px-0 d-flex justify-content-between"><span><strong>{{ a.start_time|dt }}</strong><br><span class="text-muted">Dr. {{ a.doctor.full_name }} · {{ a.doctor.specialization.name }}</span></span>{{ m.status(a.status) }}</li>{% endfor %}</ul>
+    {% else %}{{ m.empty('No upcoming appointments yet.', url_for('patient.doctors'), 'Find a doctor') }}{% endif %}</div></div></div>
+  <div class="col-lg-5"><div class="card mb-3"><div class="card-header">Current treatment</div><div class="card-body">
+    {% if plan %}<div class="fw-semibold">{{ plan.type_label }}</div><div class="text-muted">{{ plan.diagnosis }}</div><div class="mt-2">{{ m.status(plan.status) }} <a class="ms-2" href="{{ url_for('patient.treatment_status') }}">View timeline</a></div>
+    {% else %}<span class="text-muted">No active treatment.</span>{% endif %}</div></div>
+    <div class="card"><div class="card-header">Insurance</div><div class="card-body">
+    {% if policy %}<div class="fw-semibold">{{ policy.company_name }} <span class="text-muted">{{ policy.masked_number }}</span></div><div>Covers {{ policy.coverage_percent|round(0)|int }}% up to {{ policy.max_coverage|inr(0) }} per bill.</div>
+    {% else %}<span class="text-muted">No active policy linked.</span>{% endif %}</div></div></div>
+</div>{% endblock %}

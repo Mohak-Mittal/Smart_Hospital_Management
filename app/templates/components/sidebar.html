@@ -1,0 +1,31 @@
+{% set ep = request.endpoint or '' %}
+{% macro item(endpoint, label, match=None) %}<a class="nav-item {{ 'active' if ep == endpoint or (match and ep.startswith(match)) }}" href="{{ url_for(endpoint) }}">{{ label }}</a>{% endmacro %}
+<aside class="sidebar" id="sidebar" aria-label="Sidebar navigation">
+  <div class="brand"><span class="brand-dot"></span>{{ HOSPITAL_NAME }}</div>
+  <div class="who">{{ current_user.name }} · {{ current_user.role|title }}</div>
+  {% if current_user.role == 'patient' %}
+    {{ item('patient.dashboard','Dashboard') }}{{ item('patient.doctors','Find a doctor','patient.doctor_detail') }}
+    {{ item('patient.appointments','Appointments') }}{{ item('patient.treatment_status','Treatment status') }}
+    {{ item('patient.reports','Medical reports','patient.report_detail') }}{{ item('patient.invoices','Invoices & payments') }}
+    {{ item('patient.profile','My profile') }}
+  {% elif current_user.role == 'doctor' %}
+    {{ item('doctor.dashboard','Dashboard') }}{{ item('doctor.appointments','Appointments') }}{{ item('doctor.reports','My reports') }}
+  {% elif current_user.role == 'nurse' %}
+    {{ item('nurse.dashboard','My patients','nurse.') }}
+  {% elif current_user.role == 'admin' %}
+    {{ item('admin.dashboard','Dashboard') }}
+    <div class="sect">People</div>
+    {{ item('admin.patients','Patients','admin.edit_patient') }}{{ item('admin.doctors','Doctors','admin.edit_doctor') }}{{ item('admin.nurses','Nurses','admin.nurse_') }}
+    <div class="sect">Hospital</div>
+    {{ item('admin.appointments','Appointments') }}{{ item('admin.rooms','Rooms') }}{{ item('admin.medicines','Medicines','admin.movements') }}
+    {{ item('admin.emergency','Emergency queue') }}
+    <div class="sect">Finance</div>
+    {{ item('admin.billing','Billing','admin.bill_') }}{{ item('admin.insurance','Insurance') }}{{ item('admin.discharges','Discharges') }}
+  {% endif %}
+  <div class="sect">Account</div>
+  <a class="nav-item" href="{{ url_for('auth.change_password') }}">Change password</a>
+  <form method="post" action="{{ url_for('auth.logout') }}" class="mt-1">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <button class="nav-item btn btn-link text-start w-100 border-0" type="submit" style="color:#cfe0f1;text-decoration:none">Sign out</button>
+  </form>
+</aside>

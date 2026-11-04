@@ -1,0 +1,12 @@
+{% extends "base.html" %}{% block title %}Doctor dashboard{% endblock %}
+{% block content %}
+<div class="page-head"><div><h1>Good day, Dr. {{ current_user.name.split()[-1] }}</h1><div class="text-muted">{{ doctor.specialization.name }} · {{ doctor.doctor_code }}</div></div></div>
+<div class="row g-3 mb-3"><div class="col-6 col-lg-3">{{ m.kpi("Today's appointments", today|length, '', 'accent') }}</div>
+<div class="col-6 col-lg-3">{{ m.kpi('Upcoming', upcoming|length, 'after today') }}</div>
+<div class="col-6 col-lg-3">{{ m.kpi('Open treatments', open_plans) }}</div><div class="col-6 col-lg-3">{{ m.kpi('Draft reports', drafts, 'not yet published', 'warn' if drafts else '') }}</div></div>
+<div class="card mb-3"><div class="card-header">Today</div><div class="table-responsive"><table class="table mb-0 align-middle"><thead><tr><th>Time</th><th>Patient</th><th>Status</th><th>Payment</th><th></th></tr></thead><tbody>
+{% for a in today %}<tr><td>{{ a.start_time|tfmt }}</td><td>{{ a.patient.full_name }}<div class="small text-muted">{{ a.reason or '' }}</div></td><td>{{ m.status(a.status) }}</td><td>{{ m.status(a.payment_status) }}</td><td class="text-end"><a class="btn btn-sm btn-primary" href="{{ url_for('doctor.patient_detail', patient_id=a.patient_id) }}">Open record</a></td></tr>
+{% else %}<tr><td colspan="5">{{ m.empty('No appointments today.') }}</td></tr>{% endfor %}</tbody></table></div></div>
+<div class="card"><div class="card-header">Upcoming</div><div class="table-responsive"><table class="table mb-0"><tbody>
+{% for a in upcoming %}<tr><td>{{ a.start_time|dt }}</td><td>{{ a.patient.full_name }}</td><td>{{ m.status(a.payment_status) }}</td></tr>{% else %}<tr><td>{{ m.empty('Nothing scheduled.') }}</td></tr>{% endfor %}</tbody></table></div></div>
+{% endblock %}
