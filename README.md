@@ -1,6 +1,6 @@
 <div align="center">
 
-# 🏥 Smart Hospital Management & Emergency Response System
+# <img src="banner.svg" alt="Mohak Mittal" width="1000%" height="100%"/>
 
 **A full-stack hospital management demo — four role-based portals, simulated payments, insurance billing, a priority emergency queue and PDF invoices — built with Python & Flask.**
 
